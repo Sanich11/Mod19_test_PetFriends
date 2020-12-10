@@ -32,7 +32,7 @@ def test_get_all_pets_with_valid_key(filter=''):
 
 
 def test_add_new_pet_with_valid_data(name='Содерберг', animal_type='Кот Египетский',
-                                    age='3', pet_photo='images/cat1.jpg'):
+                                     age='3', pet_photo='images/cat1.jpg'):
     """Проверяем, что запрос на добавление нового питомца с указанными параметрами выполняется
     успешно."""
 
@@ -93,3 +93,42 @@ def test_successful_update_self_pet_info(name='Минималист', animal_typ
     else:
         # если спиок питомцев пустой, то выдаём исключение с текстом об отсутствии своих питомцев
         raise Exception("There is no my pets")
+
+
+def test_add_new_pet_with_valid_data_without_foto(name='Тростиночка',
+                                                  animal_type='Котетский', age='1'):
+    """Проверяем, что запрос на добавление нового питомца без фото с указанными параметрами
+    выполняется успешно."""
+
+    # Запрашиваем ключ api и сохраняем в переменую auth_key
+    _, auth_key = pf.get_api_key(valid_email, valid_password)
+
+    # Добавляем нового питомца
+    status, result = pf.add_new_pet_without_photo(auth_key, name, animal_type, age)
+
+    # Сверяем полученный ответ с ожидаемым результатом
+    assert status == 200
+    assert result['name'] == name
+
+
+def test_successful_add_foto_of_pet(pet_id='0', pet_photo='images/cat1.jpg'):
+    """Проверяем успешность запроса на добавление фото питомцу по его id"""
+
+    # Получаем ключ auth_key и запрашиваем список своих питомцев
+    _, auth_key = pf.get_api_key(valid_email, valid_password)
+    _, my_pets = pf.get_list_of_pets(auth_key, 'my_pets')
+
+    # Получаем полный путь изображения питомца и сохраняем в переменную pet_photo
+    pet_photo = os.path.join(os.path.dirname(__file__), pet_photo)
+
+    # Если список не пустой, то пробуем добавить фото питомца
+    if len(my_pets['pets']) > 0:
+        status, result = pf.add_foto_of_pet(auth_key, pet_id, pet_photo)
+
+        # Проверяем что статус ответа = 200 и фото питомца соответствует заданному
+        assert status == 200
+        assert result['pet_photo'] == pet_photo
+
+    else:
+        # если спиок питомцев пустой, то выдаём исключение с текстом об отсутствии своих питомцев
+        raise Exception("The list of 'My pets' is empty")
